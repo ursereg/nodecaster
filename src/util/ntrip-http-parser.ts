@@ -16,7 +16,7 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import {HTTPParser} from 'http-parser-ts';
+import {HTTPParser, ParseError} from 'http-parser-ts';
 
 export class NtripHTTPParser extends HTTPParser {
     static readonly REQUEST_EXP = /^(?<method>[A-Z-_]+|SOURCE (?<secret>[^ ]+)) (?<url>[^ ]+)(?: (?<protocol>HTTP|RTSP|RTP)\/(?<versionMajor>\d)\.(?<versionMinor>\d))?$/;
@@ -42,7 +42,7 @@ export class NtripHTTPParser extends HTTPParser {
         const line = this.consumeLine();
         if (!line) return;
         const match = NtripHTTPParser.REQUEST_EXP.exec(line);
-        if (match === null) throw parseError('HPE_INVALID_CONSTANT');
+        if (match === null) throw new ParseError("HPE_INVALID_CONSTANT")
 
         let method = match!.groups!['method'];
         let protocol = match!.groups!['protocol'] ?? 'HTTP';
@@ -74,7 +74,7 @@ export class NtripHTTPParser extends HTTPParser {
         const line = this.consumeLine();
         if (!line) return;
         const match = NtripHTTPParser.RESPONSE_EXP.exec(line) ?? NtripHTTPParser.ERROR_EXP.exec(line);
-        if (match === null) throw parseError('HPE_INVALID_CONSTANT');
+        if (match === null) throw new ParseError("HPE_INVALID_CONSTANT")
 
         let protocol = match!.groups!['protocol'] ?? 'HTTP';
 
@@ -116,10 +116,4 @@ export class NtripHTTPParser extends HTTPParser {
         }
         this.state = 'HEADER';
     }
-}
-
-function parseError(code: string) {
-    let err = new Error('Parse Error');
-    (err as any).code = code;
-    return err;
 }
