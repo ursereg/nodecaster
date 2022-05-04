@@ -307,7 +307,11 @@ export class NtripTransport extends Transport {
         try {
             packet = RtpPacket.fromBuffer(message);
         } catch (error) {
-            return emitClientError("RTP: Invalid packet received on plain RTP socket", error);
+            if (error instanceof Error) {
+                return emitClientError(`RTP: Invalid packet received on plain RTP socket ${error.message}`);
+            } else {
+                return emitClientError("RTP: Invalid packet received on plain RTP socket");
+            }
         }
 
         if (packet.payloadType != NtripRtpMessageType.HTTP || packet.payload == null)
@@ -637,7 +641,10 @@ export class NtripTransport extends Transport {
                 try {
                     sourcetable = await this.transport.getSourcetable(this.req.query?.query);
                 } catch (error) {
-                    return this.res.error(400, `Error filtering sourcetable: ${error.message}`);
+                    if (error instanceof Error) {
+                        return this.res.error(400, `Error filtering sourcetable: ${error.message}`);
+                    }
+                    return this.res.error(400, 'Unknown error in filtering sourcetable')
                 }
 
                 this.res.setHeader('Content-Type', this.req.ntripAgent ? 'gnss/sourcetable' : 'text/plain');
@@ -734,7 +741,10 @@ export class NtripTransport extends Transport {
                         this.req.rtpSocket!.connect(this.req.rtpRemotePort!, this.req.remote!.host);
                     });
                 } catch (err) {
-                    return this.setupError(err);
+                    if (err instanceof Error){
+                        return this.setupError(err);
+                    }
+                    return this.setupError(new Error("Unknown error in RTP socket connect"))
                 }
 
                 await this.setupSocket();
@@ -898,7 +908,10 @@ export class NtripTransport extends Transport {
                         });
                     });
                 } catch (err) {
-                    this.setupError(err);
+                    if (err instanceof Error){
+                        return this.setupError(err);
+                    }
+                    return this.setupError(new Error("Unknown error in RTP socket connect/bind"))
                 }
 
                 await this.setupSocket();

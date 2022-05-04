@@ -171,7 +171,14 @@ export class SocketTransport extends Transport {
                 auth: authResponse
             });
         } catch (err) {
-            socket.destroy(err);
+            if (err instanceof Error){
+                socket.destroy(err);
+            } else {
+                socket.destroy(new Error("Unknown error while connecting"));
+            }
+            
+            
+
         }
     }
 

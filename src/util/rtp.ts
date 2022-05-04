@@ -277,7 +277,11 @@ export class RtpSession extends stream.Duplex {
         try {
             this.push(RtpPacket.fromBuffer(message));
         } catch (err) {
-            this.destroy(err);
+            if (err instanceof Error){
+                this.destroy(err);
+            } else {
+                this.destroy(new Error("Unknown error while pushing from buffer"));
+            }
         }
     }
 
@@ -289,7 +293,12 @@ export class RtpSession extends stream.Duplex {
         try {
             RtpPacket.toBuffer(packet, this.buffer);
         } catch (err) {
-            return callback(err);
+            if (err instanceof Error){
+                return callback(err);
+            } else {
+                return callback(new Error("Unknown error putting to buffer"));
+            }
+            
         }
 
         this.socket.send(this.buffer, 0, packet.length, callback);
