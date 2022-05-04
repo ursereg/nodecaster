@@ -19,9 +19,9 @@
 import {NtripHTTPParser} from '../../util/ntrip-http-parser';
 NtripHTTPParser.bind();
 
-import http = require('http');
-import net = require('net');
-import stream = require('stream');
+import http from 'http';
+import net from 'net';
+import stream from 'stream';
 
 describe('NtripHTTPParser', () => {
     describe('request parsing', () => {
